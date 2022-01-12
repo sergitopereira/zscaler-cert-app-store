@@ -16,6 +16,10 @@ def initialize_parser():
                         help='Add Zscaler root certificate to Ruby',
                         action='store_true'
                         )
+    parser.add_argument('-c', '--curl',
+                        help='Add Zscaler root certificate to curl',
+                        action='store_true'
+                        )
     parser.add_argument('-v', '--version',
                         help='Script version',
                         action='store_true')
@@ -30,21 +34,17 @@ def plugin_selection(args):
     :param args: parer arguments
     :return:
     """
-    print(args)
     a = UpdateCertStore()
-    print("ok")
     if args.version:
         print('Plugin version version 1.0')
     if args.python:
         a.app_python()
-        return
     if args.git:
         a.app_git()
-        return
     if args.download:
         a.GetZscalerRoot()
-        return
     if args.ruby:
-        print("sergio")
         a.app_ruby()
-        return
+    if args.curl:
+        a.app_curl()
+    a.print_results()

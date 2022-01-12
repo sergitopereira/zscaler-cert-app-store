@@ -23,6 +23,10 @@ optional arguments:
 
 # Requirements
 ```bash
+if Zscaler root certificate is not downloaded, please download to
+~/ca_certs/ZscalerRootCertificate.pem
+
 python3
 pip3
 ```
+
