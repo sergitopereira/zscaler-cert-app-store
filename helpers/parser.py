@@ -12,12 +12,8 @@ def initialize_parser():
     parser.add_argument('-g', '--git',
                         help='Add Zscaler root certificate to git',
                         action='store_true')
-    parser.add_argument('-cat', '--category',
-                        help='Custom Category Name',
-                        action='store_true'
-                        )
-    parser.add_argument('-f', '--file',
-                        help='File location',
+    parser.add_argument('-r', '--ruby',
+                        help='Add Zscaler root certificate to Ruby',
                         action='store_true'
                         )
     parser.add_argument('-v', '--version',
@@ -34,7 +30,9 @@ def plugin_selection(args):
     :param args: parer arguments
     :return:
     """
+    print(args)
     a = UpdateCertStore()
+    print("ok")
     if args.version:
         print('Plugin version version 1.0')
     if args.python:
@@ -45,4 +43,8 @@ def plugin_selection(args):
         return
     if args.download:
         a.GetZscalerRoot()
+        return
+    if args.ruby:
+        print("sergio")
+        a.app_ruby()
         return
