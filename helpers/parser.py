@@ -32,6 +32,10 @@ def initialize_parser():
                         help='Add Zscaler root certificate to NPM',
                         action='store_true'
                         )
+    parser.add_argument('-l', '--libressl',
+                        help='Add Zscaler root certificate to libressl. This needs to be executed as root',
+                        action='store_true'
+                        )
 
     parser.add_argument('-v', '--version',
                         help='Script version',
@@ -64,4 +68,6 @@ def plugin_selection(args):
         a.app_wget()
     if args.npm:
         a.app_npm()
+    if args.libressl:
+        a.app_libreSSL()
     a.print_results()

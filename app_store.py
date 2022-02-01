@@ -11,7 +11,7 @@ class UpdateCertStore(object):
     def installed_apps(self):
         """Method to identify installed apps """
         result = {}
-        for app in ['python', 'git', 'ruby', 'curl', 'wget', 'npm']:
+        for app in ['python', 'git', 'ruby', 'curl', 'wget', 'npm', 'libreSSL']:
             resp = subprocess.run(f'{app} --version', shell=True, capture_output=True)
             if 'not found' in resp.stdout.decode('utf-8'):
                 result[app] = {
@@ -85,12 +85,7 @@ class UpdateCertStore(object):
         Method to update ruby ca trusted store
         gem update --system  shows ERROR:  SSL verification error
         """
-        home = os.path.expanduser("~")
         self.add_environment_variable('ruby', 'SSL_CERT_FILE')
-        cmd=f'cat {home}/ca_certs/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem'
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
-        self.print_screen(cmd, resp)
-
 
     def app_wget(self):
         """
@@ -117,6 +112,19 @@ class UpdateCertStore(object):
         to a CA cert bundle.
         """
         self.add_environment_variable('curl', 'CURL_CA_BUNDLE')
+
+    def app_libreSSL(self):
+        """
+         The script mus be executed as root.
+         sudo su
+         python zscaler-cert-app-store -l
+        :return:
+        """
+        self.GetZscalerRoot()
+        cmd = f"cat ~/ca_certs/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem"
+        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        self.print_screen(cmd, resp)
+        self.installed_apps['libreSSL'].update(zscertInstalled=True)
 
     def print_results(self):
         """Method to print results"""

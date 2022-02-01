@@ -1,5 +1,5 @@
 # zscaler-cert-app-store
-Adds Zscaler root certificate into different application CA stores
+Adds Zscaler root certificate into different application CA stores. Currently works only in OSX
 
 # Installation 
 ```bash
@@ -10,15 +10,19 @@ pip3 install -r zscaler-cert-app-store/requirements.txt --trusted-host pypi.org 
 # usage
 ```bash
 python zscaler-cert-app-store -h
-usage: zscaler-cert-app-store [-h] [-p] [-d] [-g] [-cat] [-f] [-v]
+usage: zscaler-cert-app-store [-h] [-p] [-d] [-g] [-r] [-c] [-w] [-n] [-l] [-v]
 
 optional arguments:
-  -h, --help        show this help message and exit
-  -p, --python      Add Zscaler root certificate to python
-  -d, --download    Download Zscaler root certificate from s3 bucket
-  -r, --ruby        Add Zscaler root certificate to Ruby
-  -g, --git         Add Zscaler root certificate to git
-  -v, --version     Script version
+  -h, --help      show this help message and exit
+  -p, --python    Add Zscaler root certificate to pip and requests
+  -d, --download  Download Zscaler root certificate from keychain
+  -g, --git       Add Zscaler root certificate to git
+  -r, --ruby      Add Zscaler root certificate to Ruby
+  -c, --curl      Add Zscaler root certificate to curl
+  -w, --wget      Add Zscaler root certificate to wget
+  -n, --npm       Add Zscaler root certificate to NPM
+  -l, --libressl  Add Zscaler root certificate to libressl. This needs to be executed as root
+  -v, --version   Script version
 ```
 
 # Requirements
@@ -55,6 +59,12 @@ Ruby: will add SSL_CERT_FILE environment variable depending on user bash
   command: echo "export SSL_CERT_FILE=~/ca_certs/ZscalerRootCertificate.pem" >> $HOME/.bashrc
   or
   command: echo "export SSL_CERT_FILE=~/ca_certs/ZscalerRootCertificate.pem" >> $HOME/.zshrc
+```
+
+# LibreSSL
+This need to be executed as root!
+```bash
+cat /home/root/ca_certs/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem
 ```
 
 For more information, refer to https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trusted-store#edge-browser
