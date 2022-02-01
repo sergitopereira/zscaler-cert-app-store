@@ -1,0 +1,5 @@
+Version 1.1
+- Updated ruby commands
+- Added wget app
+- Added a method to create environment variables
+- Updated README file with instructions and commands

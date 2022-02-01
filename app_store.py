@@ -11,8 +11,7 @@ class UpdateCertStore(object):
     def installed_apps(self):
         """Method to identify installed apps """
         result = {}
-        for app in ['python3', 'git', 'ruby', 'curl']:
-            print(app)
+        for app in ['python', 'git', 'ruby', 'curl', 'wget', 'npm']:
             resp = subprocess.run(f'{app} --version', shell=True, capture_output=True)
             if 'not found' in resp.stdout.decode('utf-8'):
                 result[app] = {
@@ -40,18 +39,45 @@ class UpdateCertStore(object):
         return
 
     def app_python(self):
-        """Method to update python CA trusted store"""
-        cmd = 'cat ~/ca_certs/ZscalerRootCertificate.pem >> $(python3 -m certifi)'
+        """
+        pip-system-certs package patches the PIP and the requests at runtime to use certificates
+        from the default system store rather than the bundled certificates CA.PIP will trust HTTPS sites that are
+        trusted by your host OS. It will also trust all the direct uses of the requests library and the other packages
+        that use requests
+
+        """
+        cmd = 'pip install pip_system_certs'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         print(resp)
-        self.installed_apps['python3'].update(zscertInstalled=True)
-        print(self.installed_apps)
+        self.installed_apps['python'].update(zscertInstalled=True)
+
+    def print_screen(self, cmd, response):
+        """Method to print command and response"""
+        print('-' * 32)
+        print(cmd)
+        print('-' * 32)
+        print(response)
+
+    def add_environment_variable(self, app, environment_variable):
+        """MEthod to add environment varaible"""
+        home = os.path.expanduser("~")
+        resp = subprocess.run('echo $0', shell=True, capture_output=True)
+        if 'bash' not in resp.stdout.decode('utf-8'):
+            terminal = '.zshrc'
+        else:
+            terminal = '.bash_profile'
+        cmd = f"echo export  {environment_variable}={home}/ca_certs/ZscalerRootCertificate.pem >> {home}/{terminal}"
+        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        self.print_screen(cmd, resp)
+        resp = subprocess.run(f'source {home}/.zshrc', shell=True, capture_output=True)
+        self.print_screen(f'source {home}/{terminal}', resp)
+        self.installed_apps[app].update(zscertInstalled=True)
 
     def app_git(self):
         """Method to update git ca trusted store"""
         cmd = 'git config --global http.sslcainfo ~/ca_certs/ZscalerRootCertificate.pem'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
-        print(resp)
+        self.print_screen(cmd, resp)
         self.installed_apps['git'].update(zscertInstalled=True)
 
     def app_ruby(self):
@@ -59,9 +85,30 @@ class UpdateCertStore(object):
         Method to update ruby ca trusted store
         gem update --system  shows ERROR:  SSL verification error
         """
-        cmd = 'gem cert --add ~/ca_certs/ZscalerRootCertificate.pem'
+        home = os.path.expanduser("~")
+        self.add_environment_variable('ruby', 'SSL_CERT_FILE')
+        cmd=f'cat {home}/ca_certs/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
-        self.installed_apps['ruby'].update(zscertInstalled=True)
+        self.print_screen(cmd, resp)
+
+
+    def app_wget(self):
+        """
+        Method to Add Zscaler CA certificate to wget.
+        :return:
+        """
+        home = os.path.expanduser("~")
+        cmd = f"echo ca_certificate={home}/ca_certs/ZscalerRootCertificate.pem >> {home}/.wgetrc"
+        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        self.print_screen(cmd, resp)
+        self.installed_apps['wget'].update(zscertInstalled=True)
+
+    def app_npm(self):
+        """
+        Method to Add Zscaler CA certificate to NPM.
+        :return:
+        """
+        self.add_environment_variable('npm', 'NODE_EXTRA_CA_CERTS')
 
     def app_curl(self):
         """
@@ -69,23 +116,13 @@ class UpdateCertStore(object):
         curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is set, and uses the given path as a path
         to a CA cert bundle.
         """
-        home = os.path.expanduser("~")
-        resp = subprocess.run('echo $0', shell=True, capture_output=True)
-        if 'bash' not in resp.stdout.decode('utf-8'):
-            cmd = f"echo export  CURL_CA_BUNDLE={home}/ca_certs/ZscalerRootCertificate.pem >> {home}/.zshrc"
-            resp = subprocess.run(cmd, shell=True, capture_output=True)
-            resp = subprocess.run(f'source {home}/.zshrc', shell=True, capture_output=True)
-        else:
-            cmd = f"echo export  CURL_CA_BUNDLE={home}/ca_certs/ZscalerRootCertificate.pem >> {home}/.bash_profile"
-            resp = subprocess.run(cmd, shell=True, capture_output=True)
-            resp = subprocess.run(f'source {home}/.bash_profile', shell=True, capture_output=True)
-        self.installed_apps['curl'].update(zscertInstalled=True)
+        self.add_environment_variable('curl', 'CURL_CA_BUNDLE')
 
     def print_results(self):
         """Method to print results"""
         x = PrettyTable()
         x.field_names = ["APP", "INSTALLED IN OS", "Zscaler Root Certificate"]
-        x.align= "l"
+        x.align = "l"
         for key, value in self.installed_apps.items():
             x.add_row([key, value['installed'], value['zscertInstalled']])
         print(x)
