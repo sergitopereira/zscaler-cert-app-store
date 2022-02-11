@@ -28,7 +28,7 @@ optional arguments:
 ```
 In order to install all applications that are installed run the following command
 ```bash
-zscaler-cert-app-store -h
+zscaler-cert-app-store -a
 ```
 
 
