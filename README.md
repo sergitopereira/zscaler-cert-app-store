@@ -14,6 +14,7 @@ usage: zscaler-cert-app-store [-h] [-p] [-d] [-g] [-r] [-c] [-w] [-n] [-l] [-v]
 
 optional arguments:
   -h, --help      show this help message and exit
+  -a, --all       Add Zscaler root certificate to all installed applications
   -p, --python    Add Zscaler root certificate to pip and requests
   -d, --download  Download Zscaler root certificate from keychain
   -g, --git       Add Zscaler root certificate to git
@@ -35,10 +36,13 @@ pip3
 ```
 # Script  commands
 
+```bash
+command security find-certificate -c zscaler -p >~/ca_certs/ZscalerRootCertificate.pem
+```
 Python: The script uses pip-system-certs package and will patch the PIP and requests in oder to 
 use certificates from the default system store rather than the bundled certificates CA
 ```bash
-  command: pip install pip_system_certs
+  command: cat ~/ca_certs/ZscalerRootCertificate.pem >> $(python -m certifi)
 ```
 git: The script  will run the following command
 ```bash

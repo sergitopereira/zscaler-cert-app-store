@@ -5,7 +5,7 @@ from prettytable import PrettyTable
 
 class UpdateCertStore(object):
     def __init__(self):
-        # self.GetZscalerRoot()
+        self.GetZscalerRoot()
         self.installed_apps = self.installed_apps()
 
     def installed_apps(self):
@@ -25,7 +25,6 @@ class UpdateCertStore(object):
                     'version': resp.stdout.decode('utf-8').strip(),
                     'zscertInstalled': False}
 
-        print(result)
         return result
 
     def GetZscalerRoot(self):
@@ -34,8 +33,11 @@ class UpdateCertStore(object):
         if not os.path.exists(path):
             resp = subprocess.run('mkdir ~/ca_certs', shell=True, capture_output=True)
             print(resp)
-        subprocess.run('security find-certificate -c zscaler -p >~/ca_certs/ZscalerRootCertificate.pem', shell=True,
-                       capture_output=True)
+        if not os.path.exists(f'{path}/ZscalerRootCertificate.pem'):
+            resp = subprocess.run('security find-certificate -c zscaler -p >~/ca_certs/ZscalerRootCertificate.pem',
+                                  shell=True,
+                                  capture_output=True)
+            print(resp)
         return
 
     def app_python(self):
@@ -46,7 +48,7 @@ class UpdateCertStore(object):
         that use requests
 
         """
-        cmd = 'pip install pip_system_certs'
+        cmd = 'cat ~/ca_certs/ZscalerRootCertificate.pem >> $(python -m certifi)'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         print(resp)
         self.installed_apps['python'].update(zscertInstalled=True)

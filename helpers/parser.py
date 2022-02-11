@@ -1,8 +1,13 @@
 import argparse
 from app_store import UpdateCertStore
 
+
 def initialize_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-a', '--all',
+                        help='Add Zscaler root certificate to all installed applications',
+                        action='store_true'
+                        )
     parser.add_argument('-p', '--python',
                         help='Add Zscaler root certificate to pip and requests',
                         action='store_true')
@@ -53,7 +58,7 @@ def plugin_selection(args):
     """
     a = UpdateCertStore()
     if args.version:
-        print('Plugin version version 1.1')
+        print('Plugin version version 1.2')
     if args.python:
         a.app_python()
     if args.git:
@@ -70,4 +75,19 @@ def plugin_selection(args):
         a.app_npm()
     if args.libressl:
         a.app_libreSSL()
+    if args.all:
+        for app, value in a.installed_apps.items():
+            if value['installed']:
+                if 'python' in app:
+                    a.app_python()
+                if 'git' in app:
+                    a.app_git()
+                if 'ruby' in app:
+                    a.app_ruby()
+                if 'wget' in app:
+                    a.app_wget()
+                if 'curl' in app:
+                    a.app_curl()
+                if 'npm' in app:
+                    a.app_npm()
     a.print_results()
