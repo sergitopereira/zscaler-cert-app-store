@@ -24,7 +24,13 @@ optional arguments:
   -n, --npm       Add Zscaler root certificate to NPM
   -l, --libressl  Add Zscaler root certificate to libressl. This needs to be executed as root
   -v, --version   Script version
+    
 ```
+In order to install all applications that are installed run the following command
+```bash
+zscaler-cert-app-store -h
+```
+
 
 # Requirements
 ```bash
@@ -36,9 +42,6 @@ pip3
 ```
 # Script  commands
 
-```bash
-command security find-certificate -c zscaler -p >~/ca_certs/ZscalerRootCertificate.pem
-```
 Python: The script uses pip-system-certs package and will patch the PIP and requests in oder to 
 use certificates from the default system store rather than the bundled certificates CA
 ```bash
