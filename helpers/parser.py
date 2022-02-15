@@ -9,7 +9,7 @@ def initialize_parser():
                         action='store_true'
                         )
     parser.add_argument('-p', '--python',
-                        help='Add Zscaler root certificate to pip and requests',
+                        help='Add Zscaler root certificate to pip and requests.Note that python2 is not supported',
                         action='store_true')
 
     parser.add_argument('-d', '--download',
