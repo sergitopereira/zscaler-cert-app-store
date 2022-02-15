@@ -1,6 +1,5 @@
 Version 1.3
 - Updated Parser helper in order to point python 2.X is not supported.
-
 Version 1.2
 - Updated command to update python certificate
 - Added a flag to install all installed apps
