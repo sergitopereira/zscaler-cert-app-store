@@ -35,7 +35,7 @@ zscaler-cert-app-store -a
 # Requirements
 ```bash
 if Zscaler root certificate is not downloaded via script, please download to
-~/ca_certs/ZscalerRootCertificate.pem
+~/.zscaler-cert-app-store/ZscalerRootCertificate.pem
 
 python3
 pip3
@@ -45,35 +45,35 @@ pip3
 Python3 : The script uses pip-system-certs package and will patch the PIP and requests in oder to 
 use certificates from the default system store rather than the bundled certificates CA
 ```bash
-  command: cat ~/ca_certs/ZscalerRootCertificate.pem >> $(python -m certifi)
+  command: cat ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> $(python -m certifi)
 ```
 NOTE: Python 2 is not supported.
 
 git: The script  will run the following command
 ```bash
-  command: git config --global http.sslcainfo  ~/ca_certs/ZscalerRootCertificate.pem
+  command: git config --global http.sslcainfo  ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem/ZscalerRootCertificate.pem
 ```
 curl: will add  CURL_CA_BUNDLE environment variable depending on the user terminal
 ```bash
-  command: echo "export CURL_CA_BUNDLE=~/ca_certs/ZscalerRootCertificate.pem" >> $HOME/.bashrc
+  command: echo "export CURL_CA_BUNDLE=~/.zscaler-cert-app-store/ZscalerRootCertificate.pem" >> $HOME/.bashrc
   or
-  command: echo "export CURL_CA_BUNDLE=~/ca_certs/ZscalerRootCertificate.pem" >> $HOME/.zshrc
+  command: echo "export CURL_CA_BUNDLE=~/.zscaler-cert-app-store/ZscalerRootCertificate.pem" >> $HOME/.zshrc
 ```
 wget: will tun the following command
 ```bash
-  command: echo "ca_certificate=~/ca_certs/ZscalerRootCertificate.pem" >> $HOME/.wgetrc
+  command: echo "ca_certificate=~/.zscaler-cert-app-store/ZscalerRootCertificate.pem" >> $HOME/.wgetrc
 ```
 Ruby: will add SSL_CERT_FILE environment variable depending on user bash
 ```bash
-  command: echo "export SSL_CERT_FILE=~/ca_certs/ZscalerRootCertificate.pem" >> $HOME/.bashrc
+  command: echo "export SSL_CERT_FILE=~/.zscaler-cert-app-store/ZscalerRootCertificate.pem" >> $HOME/.bashrc
   or
-  command: echo "export SSL_CERT_FILE=~/ca_certs/ZscalerRootCertificate.pem" >> $HOME/.zshrc
+  command: echo "export SSL_CERT_FILE=~/.zscaler-cert-app-store/ZscalerRootCertificate.pem" >> $HOME/.zshrc
 ```
 
 # LibreSSL
 This need to be executed as root!
 ```bash
-cat /home/root/ca_certs/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem
+cat /home/root/.zscaler-cert-app-store/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem
 ```
 
 For more information, refer to https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trusted-store#edge-browser

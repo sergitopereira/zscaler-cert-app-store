@@ -28,15 +28,16 @@ class UpdateCertStore(object):
         return result
 
     def GetZscalerRoot(self):
-        """Method to download Zscaler root Certificate from keychain and store it under ~/ca_certs"""
-        path = os.path.expanduser("~") + '/ca_certs'
+        """Method to download Zscaler root Certificate from keychain and store it under ~/.zscaler-cert-app-store"""
+        path = os.path.expanduser("~") + '/.zscaler-cert-app-store'
         if not os.path.exists(path):
-            resp = subprocess.run('mkdir ~/ca_certs', shell=True, capture_output=True)
+            resp = subprocess.run('mkdir ~/.zscaler-cert-app-store', shell=True, capture_output=True)
             print(resp)
         if not os.path.exists(f'{path}/ZscalerRootCertificate.pem'):
-            resp = subprocess.run('security find-certificate -c zscaler -p >~/ca_certs/ZscalerRootCertificate.pem',
-                                  shell=True,
-                                  capture_output=True)
+            resp = subprocess.run(
+                'security find-certificate -c zscaler -p >~/.zscaler-cert-app-store/ZscalerRootCertificate.pem',
+                shell=True,
+                capture_output=True)
             print(resp)
         return
 
@@ -48,7 +49,7 @@ class UpdateCertStore(object):
         that use requests
 
         """
-        cmd = 'cat ~/ca_certs/ZscalerRootCertificate.pem >> $(python3 -m certifi)'
+        cmd = 'cat ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> $(python3 -m certifi)'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         print(resp)
         self.installed_apps['python'].update(zscertInstalled=True)
@@ -61,23 +62,27 @@ class UpdateCertStore(object):
         print(response)
 
     def add_environment_variable(self, app, environment_variable):
-        """MEthod to add environment varaible"""
+        """Method to add environment variable to either bash_profile or zshrc"""
         home = os.path.expanduser("~")
         resp = subprocess.run('echo $0', shell=True, capture_output=True)
         if 'bash' not in resp.stdout.decode('utf-8'):
             terminal = '.zshrc'
         else:
             terminal = '.bash_profile'
-        cmd = f"echo export  {environment_variable}={home}/ca_certs/ZscalerRootCertificate.pem >> {home}/{terminal}"
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
-        self.print_screen(cmd, resp)
-        resp = subprocess.run(f'source {home}/.zshrc', shell=True, capture_output=True)
-        self.print_screen(f'source {home}/{terminal}', resp)
-        self.installed_apps[app].update(zscertInstalled=True)
+        cmd = f"cat {home}/{terminal}"
+        if environment_variable not in subprocess.run(cmd, shell=True, capture_output=True).stdout.decode('utf-8'):
+            cmd = f"echo export  {environment_variable}={home}/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> {home}/{terminal}"
+            resp = subprocess.run(cmd, shell=True, capture_output=True)
+            self.print_screen(cmd, resp)
+            resp = subprocess.run(f'source {home}/.zshrc', shell=True, capture_output=True)
+            self.print_screen(f'source {home}/{terminal}', resp)
+            self.installed_apps[app].update(zscertInstalled=True)
+        else:
+            self.installed_apps[app].update(zscertInstalled=False)
 
     def app_git(self):
         """Method to update git ca trusted store"""
-        cmd = 'git config --global http.sslcainfo ~/ca_certs/ZscalerRootCertificate.pem'
+        cmd = 'git config --global http.sslcainfo ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         self.print_screen(cmd, resp)
         self.installed_apps['git'].update(zscertInstalled=True)
@@ -95,7 +100,7 @@ class UpdateCertStore(object):
         :return:
         """
         home = os.path.expanduser("~")
-        cmd = f"echo ca_certificate={home}/ca_certs/ZscalerRootCertificate.pem >> {home}/.wgetrc"
+        cmd = f"echo ca_certificate={home}/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> {home}/.wgetrc"
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         self.print_screen(cmd, resp)
         self.installed_apps['wget'].update(zscertInstalled=True)
@@ -123,7 +128,7 @@ class UpdateCertStore(object):
         :return:
         """
         self.GetZscalerRoot()
-        cmd = f"cat ~/ca_certs/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem"
+        cmd = f"cat ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem"
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         self.print_screen(cmd, resp)
         self.installed_apps['libreSSL'].update(zscertInstalled=True)
