@@ -2,7 +2,7 @@
 import sys
 from helpers.parser import initialize_parser
 
-__version__ = '1.0'
+__version__ = '1.4'
 __author__ = 'Sergio Pereira'
 
 

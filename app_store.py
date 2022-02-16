@@ -48,7 +48,7 @@ class UpdateCertStore(object):
         that use requests
 
         """
-        cmd = 'cat ~/ca_certs/ZscalerRootCertificate.pem >> $(python -m certifi)'
+        cmd = 'cat ~/ca_certs/ZscalerRootCertificate.pem >> $(python3 -m certifi)'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         print(resp)
         self.installed_apps['python'].update(zscertInstalled=True)
