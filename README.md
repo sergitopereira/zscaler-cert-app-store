@@ -9,21 +9,30 @@ pip3 install -r zscaler-cert-app-store/requirements.txt --trusted-host pypi.org 
 
 # usage
 ```bash
-python zscaler-cert-app-store -h
-usage: zscaler-cert-app-store [-h] [-p] [-d] [-g] [-r] [-c] [-w] [-n] [-l] [-v]
+(.venv) spereira@Sergios-MacBook-Pro github % python3 zscaler-cert-app-store  -h       
+usage: zscaler-cert-app-store [-h] [-a] [-p] [-d] [-g] [-r] [-c] [-w] [-n] [-l] [-v] [--androidstudio] [--appcode] [--datagrip] [--goland] [--intellij] [--pycharm] [--rubymine]
+                              [--webstorm]
 
 optional arguments:
-  -h, --help      show this help message and exit
-  -a, --all       Add Zscaler root certificate to all installed applications
-  -p, --python    Add Zscaler root certificate to pip and requests.Note that python2 is not supported
-  -d, --download  Download Zscaler root certificate from keychain
-  -g, --git       Add Zscaler root certificate to git
-  -r, --ruby      Add Zscaler root certificate to Ruby
-  -c, --curl      Add Zscaler root certificate to curl
-  -w, --wget      Add Zscaler root certificate to wget
-  -n, --npm       Add Zscaler root certificate to NPM
-  -l, --libressl  Add Zscaler root certificate to libressl. This needs to be executed as root
-  -v, --version   Script version
+  -h, --help       show this help message and exit
+  -a, --all        Add Zscaler root certificate to all installed applications
+  -p, --python     Add Zscaler root certificate to pip and requests.Note that python2 is not supported
+  -d, --download   Download Zscaler root certificate from keychain
+  -g, --git        Add Zscaler root certificate to git
+  -r, --ruby       Add Zscaler root certificate to Ruby
+  -c, --curl       Add Zscaler root certificate to curl
+  -w, --wget       Add Zscaler root certificate to wget
+  -n, --npm        Add Zscaler root certificate to NPM
+  -l, --libressl   Add Zscaler root certificate to libressl. This needs to be executed as root
+  -v, --version    Script version
+  --androidstudio  Add Zscaler root certificate to Android Studio
+  --appcode        Add Zscaler root certificate to AppCode
+  --datagrip       Add Zscaler root certificate to DataGrip
+  --goland         Add Zscaler root certificate to GoLand
+  --intellij       Add Zscaler root certificate to IntelliJ IDEA
+  --pycharm        Add Zscaler root certificate to PyCharm
+  --rubymine       Add Zscaler root certificate to RubyMine
+  --webstorm       Add Zscaler root certificate to WebStorm
     
 ```
 In order to install all applications that are installed run the following command
