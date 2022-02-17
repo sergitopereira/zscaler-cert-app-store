@@ -1,5 +1,6 @@
 import argparse
 from app_store import UpdateCertStore
+from .apps import JETBRAINS_IDES
 
 
 def initialize_parser():
@@ -46,6 +47,9 @@ def initialize_parser():
                         help='Script version',
                         action='store_true')
 
+    for short_name, app in JETBRAINS_IDES.items():
+        parser.add_argument('--' + short_name, help=f'Add Zscaler root certificate to {app}', action='store_true')
+
     args = parser.parse_args()
     plugin_selection(args)
 
@@ -56,6 +60,7 @@ def plugin_selection(args):
     :param args: parer arguments
     :return:
     """
+    args_dict = vars(args)
     a = UpdateCertStore()
     if args.version:
         print('Plugin version version 1.5')
@@ -75,6 +80,11 @@ def plugin_selection(args):
         a.app_npm()
     if args.libressl:
         a.app_libreSSL()
+
+    for short_name, app in JETBRAINS_IDES.items():
+        if args_dict[short_name]:
+            a.app_jetbrains_ide(app)
+
     if args.all:
         for app, value in a.installed_apps.items():
             if value['installed']:
@@ -90,4 +100,6 @@ def plugin_selection(args):
                     a.app_curl()
                 if 'npm' in app:
                     a.app_npm()
+                for _, app in JETBRAINS_IDES.items():
+                    a.app_jetbrains_ide(app)
     a.print_results()

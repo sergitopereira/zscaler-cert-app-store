@@ -1,14 +1,20 @@
 import os
 import subprocess
+from pathlib import Path
+import plistlib
 from prettytable import PrettyTable
+from helpers.apps import JETBRAINS_IDE_NAMES
+
+
+KEYSTORE_PASSWORD = 'changeit'
 
 
 class UpdateCertStore(object):
     def __init__(self):
         self.GetZscalerRoot()
-        self.installed_apps = self.installed_apps()
+        self.installed_apps = self.build_installed_apps()
 
-    def installed_apps(self):
+    def build_installed_apps(self):
         """Method to identify installed apps """
         result = {}
         for app in ['python', 'git', 'ruby', 'curl', 'wget', 'npm', 'libreSSL']:
@@ -17,13 +23,72 @@ class UpdateCertStore(object):
                 result[app] = {
                     'installed': False,
                     'version': None,
-                    'zscertInstalled': False
+                    'zscertInstalled': False,
+                    'meta': {}
                 }
             else:
                 result[app] = {
                     'installed': True,
                     'version': resp.stdout.decode('utf-8').strip(),
-                    'zscertInstalled': False}
+                    'zscertInstalled': False,
+                    'meta': {}
+                }
+
+        for app in JETBRAINS_IDE_NAMES:
+            vendor = 'JetBrains'
+            # Android Studio is a JetBrains-type IDE, but is published by Google
+            if app == 'Android Studio':
+                vendor = 'Google'
+
+            app_path = os.path.join('/', 'Applications', f'{app}.app')
+            # An app's version can be found in its Info.plist file
+            info_path = os.path.join(app_path, 'Contents', 'Info.plist')
+            installed = os.path.exists(info_path)
+            version = None
+            zscertInstalled = False
+            keytool_path = None
+            keystore_path = None
+
+            if installed:
+                info = plistlib.loads(open(info_path, 'rb').read())
+                version = info['CFBundleShortVersionString']
+                # Provides the application support folder path needed to find the cert store
+                path_selector = info['JVMOptions']['Properties']['idea.paths.selector']
+
+                store_path = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', vendor, path_selector, 'ssl')
+                if not os.path.exists(store_path):
+                    # Acts like mkdir -p
+                    Path(store_path).mkdir(parents=True, exist_ok=True)
+
+                # Searches for keytool
+                keytool_paths = list(Path(app_path).glob('**/keytool'))
+                # Found keytool
+                if len(keytool_paths) >= 0:
+                    # Assume the first one is the one we want
+                    keytool_path = keytool_paths[0]
+                    keystore_path = os.path.join(store_path, 'cacerts')
+                    resp = subprocess.run([
+                        keytool_path,
+                        '-list',
+                        # Find just this root certificate.  This is the alias used when importing the cert manually via
+                        # the app's settings screen
+                        '-alias', 'zscaler root ca',
+                        '-storepass', KEYSTORE_PASSWORD,
+                        '-keystore', keystore_path
+                    ], capture_output=True)
+                    # If it's installed, keytool will return the fingerprint
+                    zscertInstalled = 'Certificate fingerprint' in resp.stdout.decode('utf-8')
+
+            result[app] = {
+                'installed': installed,
+                'version': version,
+                'zscertInstalled': zscertInstalled,
+                'meta': {
+                    # Store these paths so we don't have to determine them again later
+                    'keytool_path': keytool_path,
+                    'keystore_path': keystore_path
+                }
+            }
 
         return result
 
@@ -33,13 +98,14 @@ class UpdateCertStore(object):
         if not os.path.exists(path):
             resp = subprocess.run('mkdir ~/.zscaler-cert-app-store', shell=True, capture_output=True)
             print(resp)
-        if not os.path.exists(f'{path}/ZscalerRootCertificate.pem'):
+        cert_path = f'{path}/ZscalerRootCertificate.pem'
+        if not os.path.exists(cert_path):
             resp = subprocess.run(
                 'security find-certificate -c zscaler -p >~/.zscaler-cert-app-store/ZscalerRootCertificate.pem',
                 shell=True,
                 capture_output=True)
             print(resp)
-        return
+        return cert_path
 
     def app_python(self):
         """
@@ -132,6 +198,28 @@ class UpdateCertStore(object):
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         self.print_screen(cmd, resp)
         self.installed_apps['libreSSL'].update(zscertInstalled=True)
+
+    def app_jetbrains_ide(self, name: str):
+        """
+        Adds the Zscaler CA certificate to a JetBrains-type IDE
+        :param name: name of the IDE
+        """
+        app = self.installed_apps[name]
+        if app['installed'] and not app['zscertInstalled']:
+            cert_path = self.GetZscalerRoot()
+            cmd = [
+                str(app['meta']['keytool_path']),
+                '-importcert',
+                '-file', cert_path,
+                '-alias', 'zscaler root ca',
+                '-storepass', KEYSTORE_PASSWORD,
+                '-noprompt',
+                '-keystore', str(app['meta']['keystore_path'])
+            ]
+            resp = subprocess.run(cmd, capture_output=True)
+            self.print_screen(' '.join(cmd), resp)
+            zscertInstalled = b'Certificate was added to keystore' in resp.stderr
+            app.update(zscertInstalled=zscertInstalled)
 
     def print_results(self):
         """Method to print results"""
