@@ -85,7 +85,7 @@ This need to be executed as root!
 cat /home/root/.zscaler-cert-app-store/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem
 ```
 
-# LibreSSL
+# IOS Simulator
 IOS simulator. Please note that this command is required to be run for each simulator.
 ```bash
   command: xcrun simctl keychain booted add-root-cert ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem
