@@ -50,6 +50,10 @@ def initialize_parser():
     for short_name, app in JETBRAINS_IDES.items():
         parser.add_argument('--' + short_name, help=f'Add Zscaler root certificate to {app}', action='store_true')
 
+    parser.add_argument('-i', '--ios',
+                        help='Add Zscaler root certificate to Apple IOS simulator',
+                        action='store_true')
+
     args = parser.parse_args()
     plugin_selection(args)
 
@@ -63,7 +67,7 @@ def plugin_selection(args):
     args_dict = vars(args)
     a = UpdateCertStore()
     if args.version:
-        print('Plugin version version 1.5')
+        print('Plugin version version 1.6')
     if args.python:
         a.app_python()
     if args.git:
@@ -80,6 +84,8 @@ def plugin_selection(args):
         a.app_npm()
     if args.libressl:
         a.app_libreSSL()
+    if args.ios:
+        a.ios()
 
     for short_name, app in JETBRAINS_IDES.items():
         if args_dict[short_name]:

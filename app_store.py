@@ -221,6 +221,16 @@ class UpdateCertStore(object):
             zscertInstalled = b'Certificate was added to keystore' in resp.stderr
             app.update(zscertInstalled=zscertInstalled)
 
+    def app_ios(self):
+        """
+        Script to add Zscaler root certificate in Apple IOs simulator. Script ,ust be run in each Simulator
+        :return:
+        """
+        self.GetZscalerRoot()
+        cmd = f"xcrun simctl keychain booted add-root-cert  ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem"
+        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        self.print_screen(cmd, resp)
+
     def print_results(self):
         """Method to print results"""
         x = PrettyTable()

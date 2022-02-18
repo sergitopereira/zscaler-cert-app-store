@@ -9,9 +9,9 @@ pip3 install -r zscaler-cert-app-store/requirements.txt --trusted-host pypi.org 
 
 # usage
 ```bash
-(.venv) spereira@Sergios-MacBook-Pro github % python3 zscaler-cert-app-store  -h       
-usage: zscaler-cert-app-store [-h] [-a] [-p] [-d] [-g] [-r] [-c] [-w] [-n] [-l] [-v] [--androidstudio] [--appcode] [--datagrip] [--goland] [--intellij] [--pycharm] [--rubymine]
-                              [--webstorm]
+% python zscaler-cert-app-store -h
+usage: zscaler-cert-app-store [-h] [-a] [-p] [-d] [-g] [-r] [-c] [-w] [-n] [-l] [-v] [--androidstudio] [--appcode] [--datagrip] [--goland] [--intellij]
+                              [--pycharm] [--rubymine] [--webstorm] [-i]
 
 optional arguments:
   -h, --help       show this help message and exit
@@ -33,7 +33,7 @@ optional arguments:
   --pycharm        Add Zscaler root certificate to PyCharm
   --rubymine       Add Zscaler root certificate to RubyMine
   --webstorm       Add Zscaler root certificate to WebStorm
-    
+  -i, --ios        Add Zscaler root certificate to Apple IOS simulator 
 ```
 In order to install all applications that are installed run the following command
 ```bash
@@ -83,6 +83,12 @@ Ruby: will add SSL_CERT_FILE environment variable depending on user bash
 This need to be executed as root!
 ```bash
 cat /home/root/.zscaler-cert-app-store/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem
+```
+
+# LibreSSL
+IOS simulator. Please note that this command is required to be run for each simulator.
+```bash
+  command: xcrun simctl keychain booted add-root-cert ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem
 ```
 
 For more information, refer to https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trusted-store#edge-browser
