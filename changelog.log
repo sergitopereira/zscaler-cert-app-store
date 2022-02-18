@@ -1,3 +1,5 @@
+Version 1.6
+- Added additional flag and command in order to update apple IO simulator
 Version 1.5
 - Update  path where the certificate is stored
 - Added a verification steps in order to identify if environment Variable is already configured
