@@ -223,7 +223,7 @@ class UpdateCertStore(object):
 
     def app_ios(self):
         """
-        Script to add Zscaler root certificate in Apple IOs simulator. Script ,ust be run in each Simulator
+        Script to add Zscaler root certificate in Apple IOs simulator. Script ,must be run in each Simulator
         :return:
         """
         self.GetZscalerRoot()
