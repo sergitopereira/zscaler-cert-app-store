@@ -24,7 +24,7 @@ optional arguments:
   -w, --wget       Add Zscaler root certificate to wget
   -n, --npm        Add Zscaler root certificate to NPM
   -l, --libressl   Add Zscaler root certificate to libressl. This needs to be executed as root
-  -v, --version    Script version
+  -v, --version    Displays script version and information about discovered apps
   --androidstudio  Add Zscaler root certificate to Android Studio
   --appcode        Add Zscaler root certificate to AppCode
   --datagrip       Add Zscaler root certificate to DataGrip
@@ -33,7 +33,7 @@ optional arguments:
   --pycharm        Add Zscaler root certificate to PyCharm
   --rubymine       Add Zscaler root certificate to RubyMine
   --webstorm       Add Zscaler root certificate to WebStorm
-  -i, --ios        Add Zscaler root certificate to Apple IOS simulator 
+  -i, --ios        Add Zscaler root certificate to Apple IOS simulator
 ```
 In order to install all applications that are installed run the following command
 ```bash
