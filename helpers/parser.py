@@ -46,7 +46,7 @@ def initialize_parser():
                         )
 
     parser.add_argument('-v', '--version',
-                        help='Script version',
+                        help='Displays script version and information about discovered apps',
                         action='store_true')
 
     for short_name, app in JETBRAINS_IDES.items():
@@ -69,7 +69,7 @@ def plugin_selection(args):
     args_dict = vars(args)
     a = UpdateCertStore()
     if args.version:
-        print('Plugin version version 1.6')
+        print('Plugin version version 1.7')
     if args.python:
         a.app_python()
     if args.git:
