@@ -68,8 +68,8 @@ def plugin_selection(args):
     """
     args_dict = vars(args)
     a = UpdateCertStore()
-    if args.info:
-        print('Plugin version version 1.6')
+    if args.version:
+        print('Plugin version version 1.7')
     if args.python:
         a.app_python()
     if args.git:
