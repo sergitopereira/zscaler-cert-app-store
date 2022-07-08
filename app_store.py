@@ -4,15 +4,63 @@ from pathlib import Path
 import plistlib
 from prettytable import PrettyTable
 from helpers.apps import JETBRAINS_IDE_NAMES
-
+from os import environ
 
 KEYSTORE_PASSWORD = 'changeit'
 
 
 class UpdateCertStore(object):
     def __init__(self):
+        self.home = os.path.expanduser("~")
         self.GetZscalerRoot()
+        self.terminal = self._detect_terminal_profile()
+        self.env_variables = self._obtain_environment_variables()
         self.installed_apps = self.build_installed_apps()
+
+    def _obtain_environment_variables(self):
+        """Method to obtain system environment variables
+        return string
+        """
+        cmd = f"cat {self.home}/{self.terminal}"
+        resp = subprocess.run(cmd, shell=True, capture_output=True).stdout.decode('utf-8')
+        return resp
+
+    def _detect_terminal_profile(self):
+
+        """Method to detect OSX user terminal
+        Returns string
+        """
+        if 'bash' in environ['SHELL']:
+            terminal = '.bash_profile'
+        elif 'zsh' in environ['SHELL']:
+            terminal = '.zshrc'
+        else:
+            raise ValueError("Terminal profile not supported.")
+        return terminal
+
+    def _verify_installation(self, app):
+        flag = False
+        if app == 'git':
+            resp = subprocess.run(f'git config --list', shell=True, capture_output=True).stdout.decode('utf-8')
+            if 'ZscalerRootCertificate' in resp:
+                flag = True
+        if app == 'wget':
+            resp = subprocess.run(f'cat {self.home}/.wgetrc', shell=True, capture_output=True).stdout.decode('utf-8')
+            if 'ZscalerRootCertificate' in resp:
+                flag = True
+        if app == 'python':
+            if 'REQUESTS_CA_BUNDLE' in self.env_variables:
+                flag = True
+        if app == 'curl':
+            if 'CURL_CA_BUNDLE' in self.env_variables:
+                flag = True
+        if app == 'npm':
+            if 'NODE_EXTRA_CA_CERTS' in self.env_variables:
+                flag = True
+        if app == 'ruby':
+            if 'SSL_CERT_FILE' in self.env_variables:
+                flag = True
+        return flag
 
     def build_installed_apps(self):
         """Method to identify installed apps """
@@ -23,14 +71,14 @@ class UpdateCertStore(object):
                 result[app] = {
                     'installed': False,
                     'version': None,
-                    'zscertInstalled': False,
+                    'zscertInstalled': self._verify_installation(app),
                     'meta': {}
                 }
             else:
                 result[app] = {
                     'installed': True,
                     'version': resp.stdout.decode('utf-8').strip(),
-                    'zscertInstalled': False,
+                    'zscertInstalled': self._verify_installation(app),
                     'meta': {}
                 }
 
@@ -55,7 +103,8 @@ class UpdateCertStore(object):
                 # Provides the application support folder path needed to find the cert store
                 path_selector = info['JVMOptions']['Properties']['idea.paths.selector']
 
-                store_path = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', vendor, path_selector, 'ssl')
+                store_path = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', vendor,
+                                          path_selector, 'ssl')
                 if not os.path.exists(store_path):
                     # Acts like mkdir -p
                     Path(store_path).mkdir(parents=True, exist_ok=True)
@@ -117,7 +166,9 @@ class UpdateCertStore(object):
         """
         cmd = 'cat ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> $(python3 -m certifi)'
         resp = subprocess.run(cmd, shell=True, capture_output=True)
-        print(resp)
+        self.print_screen(cmd, resp)
+        # Python Requests looks automatically for REQUESTS_CA_BUNDLE environment variable.
+        self.add_environment_variable('python', 'REQUESTS_CA_BUNDLE')
         self.installed_apps['python'].update(zscertInstalled=True)
 
     def print_screen(self, cmd, response):
@@ -129,19 +180,14 @@ class UpdateCertStore(object):
 
     def add_environment_variable(self, app, environment_variable):
         """Method to add environment variable to either bash_profile or zshrc"""
-        home = os.path.expanduser("~")
-        resp = subprocess.run('echo $0', shell=True, capture_output=True)
-        if 'bash' not in resp.stdout.decode('utf-8'):
-            terminal = '.zshrc'
-        else:
-            terminal = '.bash_profile'
-        cmd = f"cat {home}/{terminal}"
+
+        cmd = f"cat {self.home}/{self.terminal}"
         if environment_variable not in subprocess.run(cmd, shell=True, capture_output=True).stdout.decode('utf-8'):
-            cmd = f"echo export  {environment_variable}={home}/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> {home}/{terminal}"
+            cmd = f"echo export  {environment_variable}={self.home}/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> {self.home}/{self.terminal}"
             resp = subprocess.run(cmd, shell=True, capture_output=True)
             self.print_screen(cmd, resp)
-            resp = subprocess.run(f'source {home}/.zshrc', shell=True, capture_output=True)
-            self.print_screen(f'source {home}/{terminal}', resp)
+            resp = subprocess.run(f'source {self.home}/.zshrc', shell=True, capture_output=True)
+            self.print_screen(f'source {self.home}/{self.terminal}', resp)
             self.installed_apps[app].update(zscertInstalled=True)
         else:
             self.installed_apps[app].update(zscertInstalled=False)
@@ -165,6 +211,8 @@ class UpdateCertStore(object):
         Method to Add Zscaler CA certificate to wget.
         :return:
         """
+        if self.installed_apps['wget']['zscertInstalled']:
+            return
         home = os.path.expanduser("~")
         cmd = f"echo ca_certificate={home}/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> {home}/.wgetrc"
         resp = subprocess.run(cmd, shell=True, capture_output=True)
@@ -180,7 +228,7 @@ class UpdateCertStore(object):
 
     def app_curl(self):
         """
-        Method to update golang ca trusted store
+        Method to update curl app ca trusted store
         curl recognizes the environment variable named 'CURL_CA_BUNDLE' if it is set, and uses the given path as a path
         to a CA cert bundle.
         """

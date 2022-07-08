@@ -1,3 +1,7 @@
+Version 1.7
+- Script verifies if Zscaler root certificate is already installed in the application store. If so, not action is taken
+- Script displays  apps installed in OS and shows whether Zscaler Root certificate is installed in the app specific
+certificate store or not
 Version 1.6
 - Added additional flag and command in order to update apple IO simulator
 Version 1.5
@@ -11,7 +15,6 @@ Version 1.2
 - Updated command to update python certificate
 - Added a flag to install all installed apps
 - The Script downloads Zscaler Certificate when class is initiated
-
 Version 1.1
 - Updated ruby commands
 - Added wget app

@@ -1,5 +1,5 @@
 # zscaler-cert-app-store
-Adds Zscaler root certificate into different application CA stores. Currently works only in OSX
+Adds Zscaler root certificate into different application CA stores running in macOS.
 
 # Installation 
 ```bash
@@ -51,11 +51,19 @@ pip3
 ```
 # Script  commands
 
-Python3 : The script uses pip-system-certs package and will patch the PIP and requests in oder to 
+Python3 PIP: The script uses pip-system-certs package and will patch the PIP and requests in oder to 
 use certificates from the default system store rather than the bundled certificates CA
 ```bash
   command: cat ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> $(python -m certifi)
 ```
+Python3 requests: The script uses pip-system-certs package and will patch the PIP and requests in oder to 
+use certificates from the default system store rather than the bundled certificates CA
+```bash
+  command: echo "export REQUESTS_CA_BUNDLE=~/.zscaler-cert-app-store/ZscalerRootCertificate.pem" >> $HOME/.bashrc
+  or
+  command: echo "export REQUESTS_CA_BUNDLE=~/.zscaler-cert-app-store/ZscalerRootCertificate.pem" >> $HOME/.zshrc
+```
+
 NOTE: Python 2 is not supported.
 
 git: The script  will run the following command
