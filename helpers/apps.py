@@ -2,7 +2,7 @@ JETBRAINS_IDES = {
     'androidstudio': 'Android Studio',
     'appcode': 'AppCode',
     'datagrip': 'DataGrip',
-    'goland': 'GoLand',
+    'golang': 'GoLang',
     'intellij': 'IntelliJ IDEA',
     'pycharm': 'PyCharm',
     'rubymine': 'RubyMine',
