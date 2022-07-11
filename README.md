@@ -28,7 +28,7 @@ optional arguments:
   --androidstudio  Add Zscaler root certificate to Android Studio
   --appcode        Add Zscaler root certificate to AppCode
   --datagrip       Add Zscaler root certificate to DataGrip
-  --goland         Add Zscaler root certificate to GoLand
+  --golang         Add Zscaler root certificate to GoLand
   --intellij       Add Zscaler root certificate to IntelliJ IDEA
   --pycharm        Add Zscaler root certificate to PyCharm
   --rubymine       Add Zscaler root certificate to RubyMine
