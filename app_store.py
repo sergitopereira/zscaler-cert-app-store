@@ -1,10 +1,12 @@
 import os
+import pdb
 import subprocess
 from pathlib import Path
 import plistlib
 from prettytable import PrettyTable
 from helpers.apps import JETBRAINS_IDE_NAMES
 from os import environ
+import re
 
 KEYSTORE_PASSWORD = 'changeit'
 
@@ -60,12 +62,17 @@ class UpdateCertStore(object):
         if app == 'ruby':
             if 'SSL_CERT_FILE' in self.env_variables:
                 flag = True
+
+        if app == 'az':
+            resp = subprocess.run(f'az login', shell=True, capture_output=True).stdout.decode('utf-8')
+            if 'CERTIFICATE_VERIFY_FAILED' not in resp:
+                flag = True
         return flag
 
     def build_installed_apps(self):
         """Method to identify installed apps """
         result = {}
-        for app in ['python', 'git', 'ruby', 'curl', 'wget', 'npm', 'libreSSL']:
+        for app in ['python', 'git', 'ruby', 'curl', 'wget', 'npm', 'libreSSL', 'az']:
             resp = subprocess.run(f'{app} --version', shell=True, capture_output=True)
             if 'not found' in resp.stdout.decode('utf-8'):
                 result[app] = {
@@ -276,6 +283,22 @@ class UpdateCertStore(object):
         """
         self.GetZscalerRoot()
         cmd = f"xcrun simctl keychain booted add-root-cert  ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem"
+        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        self.print_screen(cmd, resp)
+
+    def app_az(self):
+        """
+        Script to add Zscaler root certificate to azure-cli
+        https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy
+        :return:
+        """
+        self.GetZscalerRoot()
+        cmd = f"az --version"
+        regex = re.compile(r"location\s\'(.*?)'")
+        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        #self.print_screen(cmd, resp)
+        py = regex.findall(resp.stdout.decode('utf-8'))[0]
+        cmd = f" cat  ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem  >>$({py} -m certifi)"
         resp = subprocess.run(cmd, shell=True, capture_output=True)
         self.print_screen(cmd, resp)
 

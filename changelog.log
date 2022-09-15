@@ -1,3 +1,5 @@
+Version 1.8
+- Script now updated azure-cli
 Version 1.7
 - Script verifies if Zscaler root certificate is already installed in the application store. If so, not action is taken
 - Script displays  apps installed in OS and shows whether Zscaler Root certificate is installed in the app specific

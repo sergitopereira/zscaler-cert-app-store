@@ -11,6 +11,11 @@ def initialize_parser():
                         help='Add Zscaler root certificate to all installed applications',
                         action='store_true'
                         )
+
+    parser.add_argument('-az', '--azure',
+                        help='Add Zscaler root certificate to Azure CLI',
+                        action='store_true')
+
     parser.add_argument('-p', '--python',
                         help='Add Zscaler root certificate to pip and requests.Note that python2 is not supported',
                         action='store_true')
@@ -69,7 +74,7 @@ def plugin_selection(args):
     args_dict = vars(args)
     a = UpdateCertStore()
     if args.version:
-        print('Plugin version version 1.7')
+        print('Plugin version version 1.8')
     if args.python:
         a.app_python()
     if args.git:
@@ -87,7 +92,9 @@ def plugin_selection(args):
     if args.libressl:
         a.app_libreSSL()
     if args.ios:
-        a.ios()
+        a.app_ios()
+    if args.azure:
+        a.app_az()
 
     for short_name, app in JETBRAINS_IDES.items():
         if args_dict[short_name]:
