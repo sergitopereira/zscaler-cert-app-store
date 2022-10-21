@@ -24,7 +24,7 @@ class UpdateCertStore(object):
         return string
         """
         cmd = f"cat {self.home}/{self.terminal}"
-        resp = subprocess.run(cmd, shell=True, capture_output=True).stdout.decode('utf-8')
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
         return resp
 
     def _detect_terminal_profile(self):
@@ -43,11 +43,11 @@ class UpdateCertStore(object):
     def _verify_installation(self, app):
         flag = False
         if app == 'git':
-            resp = subprocess.run(f'git config --list', shell=True, capture_output=True).stdout.decode('utf-8')
+            resp = subprocess.run(f'git config --list', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
             if 'ZscalerRootCertificate' in resp:
                 flag = True
         if app == 'wget':
-            resp = subprocess.run(f'cat {self.home}/.wgetrc', shell=True, capture_output=True).stdout.decode('utf-8')
+            resp = subprocess.run(f'cat {self.home}/.wgetrc', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
             if 'ZscalerRootCertificate' in resp:
                 flag = True
         if app == 'python':
@@ -64,7 +64,7 @@ class UpdateCertStore(object):
                 flag = True
 
         if app == 'az':
-            resp = subprocess.run(f'az login', shell=True, capture_output=True).stdout.decode('utf-8')
+            resp = subprocess.run(f'az login', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8')
             if 'CERTIFICATE_VERIFY_FAILED' not in resp:
                 flag = True
         return flag
@@ -73,7 +73,7 @@ class UpdateCertStore(object):
         """Method to identify installed apps """
         result = {}
         for app in ['python', 'git', 'ruby', 'curl', 'wget', 'npm', 'libreSSL', 'az']:
-            resp = subprocess.run(f'{app} --version', shell=True, capture_output=True)
+            resp = subprocess.run(f'{app} --version', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if 'not found' in resp.stdout.decode('utf-8'):
                 result[app] = {
                     'installed': False,
@@ -152,14 +152,14 @@ class UpdateCertStore(object):
         """Method to download Zscaler root Certificate from keychain and store it under ~/.zscaler-cert-app-store"""
         path = os.path.expanduser("~") + '/.zscaler-cert-app-store'
         if not os.path.exists(path):
-            resp = subprocess.run('mkdir ~/.zscaler-cert-app-store', shell=True, capture_output=True)
+            resp = subprocess.run('mkdir ~/.zscaler-cert-app-store', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print(resp)
         cert_path = f'{path}/ZscalerRootCertificate.pem'
         if not os.path.exists(cert_path):
             resp = subprocess.run(
                 'security find-certificate -c zscaler -p >~/.zscaler-cert-app-store/ZscalerRootCertificate.pem',
                 shell=True,
-                capture_output=True)
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print(resp)
         return cert_path
 
@@ -172,7 +172,7 @@ class UpdateCertStore(object):
 
         """
         cmd = 'cat ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> $(python3 -m certifi)'
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.print_screen(cmd, resp)
         # Python Requests looks automatically for REQUESTS_CA_BUNDLE environment variable.
         self.add_environment_variable('python', 'REQUESTS_CA_BUNDLE')
@@ -189,11 +189,11 @@ class UpdateCertStore(object):
         """Method to add environment variable to either bash_profile or zshrc"""
 
         cmd = f"cat {self.home}/{self.terminal}"
-        if environment_variable not in subprocess.run(cmd, shell=True, capture_output=True).stdout.decode('utf-8'):
+        if environment_variable not in subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode('utf-8'):
             cmd = f"echo export  {environment_variable}={self.home}/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> {self.home}/{self.terminal}"
-            resp = subprocess.run(cmd, shell=True, capture_output=True)
+            resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.print_screen(cmd, resp)
-            resp = subprocess.run(f'source {self.home}/.zshrc', shell=True, capture_output=True)
+            resp = subprocess.run(f'source {self.home}/.zshrc', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.print_screen(f'source {self.home}/{self.terminal}', resp)
             self.installed_apps[app].update(zscertInstalled=True)
         else:
@@ -202,7 +202,7 @@ class UpdateCertStore(object):
     def app_git(self):
         """Method to update git ca trusted store"""
         cmd = 'git config --global http.sslcainfo ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem'
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.print_screen(cmd, resp)
         self.installed_apps['git'].update(zscertInstalled=True)
 
@@ -222,7 +222,7 @@ class UpdateCertStore(object):
             return
         home = os.path.expanduser("~")
         cmd = f"echo ca_certificate={home}/.zscaler-cert-app-store/ZscalerRootCertificate.pem >> {home}/.wgetrc"
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.print_screen(cmd, resp)
         self.installed_apps['wget'].update(zscertInstalled=True)
 
@@ -250,7 +250,7 @@ class UpdateCertStore(object):
         """
         self.GetZscalerRoot()
         cmd = f"cat ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem >>/private/etc/ssl/cert.pem"
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.print_screen(cmd, resp)
         self.installed_apps['libreSSL'].update(zscertInstalled=True)
 
@@ -271,7 +271,7 @@ class UpdateCertStore(object):
                 '-noprompt',
                 '-keystore', str(app['meta']['keystore_path'])
             ]
-            resp = subprocess.run(cmd, capture_output=True)
+            resp = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.print_screen(' '.join(cmd), resp)
             zscertInstalled = b'Certificate was added to keystore' in resp.stderr
             app.update(zscertInstalled=zscertInstalled)
@@ -283,7 +283,7 @@ class UpdateCertStore(object):
         """
         self.GetZscalerRoot()
         cmd = f"xcrun simctl keychain booted add-root-cert  ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem"
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.print_screen(cmd, resp)
 
     def app_az(self):
@@ -295,11 +295,11 @@ class UpdateCertStore(object):
         self.GetZscalerRoot()
         cmd = f"az --version"
         regex = re.compile(r"location\s\'(.*?)'")
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #self.print_screen(cmd, resp)
         py = regex.findall(resp.stdout.decode('utf-8'))[0]
         cmd = f" cat  ~/.zscaler-cert-app-store/ZscalerRootCertificate.pem  >>$({py} -m certifi)"
-        resp = subprocess.run(cmd, shell=True, capture_output=True)
+        resp = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.print_screen(cmd, resp)
 
     def print_results(self):
