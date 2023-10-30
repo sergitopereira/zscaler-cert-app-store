@@ -1,3 +1,5 @@
+Version 2.0
+- Script Downloads system and user certificates including Zscaler certificate in a bundle
 Version 1.8
 - Script now updated azure-cli
 Version 1.7

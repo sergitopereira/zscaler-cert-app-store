@@ -157,7 +157,12 @@ class UpdateCertStore(object):
         cert_path = f'{path}/ZscalerRootCertificate.pem'
         if not os.path.exists(cert_path):
             resp = subprocess.run(
-                'security find-certificate -c zscaler -p >~/.zscaler-cert-app-store/ZscalerRootCertificate.pem',
+                'security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain  >~/.zscaler-cert-app-store/ZscalerRootCertificate.pem',
+                shell=True,
+                capture_output=True)
+            print(resp)
+            resp = subprocess.run(
+                'security find-certificate -a -p /Library/Keychains/System.keychain  >>~/.zscaler-cert-app-store/ZscalerRootCertificate.pem',
                 shell=True,
                 capture_output=True)
             print(resp)
