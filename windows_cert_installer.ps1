@@ -49,6 +49,22 @@ function Add-Cert-To-Git($penname) {
     }
 }
 
+function Add-Environment-Variables($location) {
+    # Requests, PIP, NPM, Curl, Ruby.
+    if (-Not [System.Environment]::GetEnvironmentVariable('REQUESTS_CA_BUNDLE') ) {
+        [System.Environment]::SetEnvironmentVariable("REQUESTS_CA_BUNDLE", $location, "Machine")
+        Write-Output "REQUESTS_CA_BUNDLE Environment Variable configured"
+        }
+    if (-Not [System.Environment]::GetEnvironmentVariable('NODE_EXTRA_CA_CERTS') ) {
+        [System.Environment]::SetEnvironmentVariable("NODE_EXTRA_CA_CERTS", $location, "Machine")
+        Write-Output "NODE_EXTRA_CA_CERTS Environment Variable configured"
+        }
+    if (-Not [System.Environment]::GetEnvironmentVariable('SSL_CERT_FILE') ) {
+        [System.Environment]::SetEnvironmentVariable("SSL_CERT_FILE", $location, "Machine")
+        Write-Output "SSL_CERT_FILE Environment Variable configured"
+        }
+}
+
 function Add-Cert-To-Python($penname) {
     if (Get-Command "python.exe" -ErrorAction SilentlyContinue) {
         $pythonstartpath = Split-Path (Get-Command "python.exe").Path -Parent
@@ -76,6 +92,7 @@ function Main {
     Get-Zscaler-Cert $certname
     Set-Location '~\zscaler-cert-app-store'
     Convert-Cert $certname $penname
+    $File=Resolve-Path "ZscalerRootCertificate.pem"
 
     # If cert files exist do importation to 3rd party applications.
     if ((Test-Path -Path $certname -PathType Leaf) -And (Test-Path -Path $pemname -PathType Leaf)) {
@@ -83,6 +100,7 @@ function Main {
 
         Add-Cert-To-Git $penname
         Add-Cert-To-Python $penname
+        Add-Environment-Variables $File
 
     }
     Else {
@@ -93,6 +111,6 @@ function Main {
 }
 
 # Run Program
-Write-Output "Windows Zscaler Cert installer v0.1"
+Write-Output "Windows Zscaler Cert installer v0.2"
 Test-Privileges
 Main
