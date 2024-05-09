@@ -50,7 +50,7 @@ function Add-Cert-To-Git($penname) {
 }
 
 function Add-Environment-Variables($location) {
-    # Requests, PIP, NPM, Curl, Ruby.
+    # Requests, PIP, NPM, Curl, Ruby. AWS
     if (-Not [System.Environment]::GetEnvironmentVariable('REQUESTS_CA_BUNDLE') ) {
         [System.Environment]::SetEnvironmentVariable("REQUESTS_CA_BUNDLE", $location, "Machine")
         Write-Output "REQUESTS_CA_BUNDLE Environment Variable configured"
@@ -62,6 +62,10 @@ function Add-Environment-Variables($location) {
     if (-Not [System.Environment]::GetEnvironmentVariable('SSL_CERT_FILE') ) {
         [System.Environment]::SetEnvironmentVariable("SSL_CERT_FILE", $location, "Machine")
         Write-Output "SSL_CERT_FILE Environment Variable configured"
+        }
+    if (-Not [System.Environment]::GetEnvironmentVariable('AWS_CA_BUNDLE') ) {
+        [System.Environment]::SetEnvironmentVariable("AWS_CA_BUNDLE", $location, "Machine")
+        Write-Output "AWS_CA_BUNDLE Environment Variable configured"
         }
 }
 
