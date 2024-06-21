@@ -1,4 +1,4 @@
-$Folder = "$($home)\zscaler-cert-app-store"
+$Folder = "C:\Users\Public\zscaler-cert-app-store"
 $Store = Join-Path -Path $Folder -ChildPath "ZscalerCAbundle.pem"
 function Create-Folder {
     ### Create Folder in user home ###
