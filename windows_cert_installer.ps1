@@ -96,8 +96,8 @@ function Convert-Cert($certname, $penname) {
 
 function Add-Cert-To-Git() {
     if (Get-Command "git.exe" -ErrorAction SilentlyContinue) {
-        Write-Output "--> Add Zscaler cert to git cert store."
-        Get-Content $Store | Add-Content $(git config --get http.sslcainfo)
+        Write-Output "--> Patch git"
+        git config --system http.sslbackend schannel
     }
     else {
         Write-Output "git is either not installed or not in the %PATH%.  Skipping."
