@@ -127,7 +127,7 @@ function Add-Environment-Variables {
 function Main {
     Create-Folder
     New-Bundle
-    Set-Location '~\zscaler-cert-app-store'
+    Set-Location $Folder
     Add-Environment-Variables
     Add-Cert-To-Git
 
