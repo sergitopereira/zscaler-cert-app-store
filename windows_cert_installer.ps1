@@ -122,6 +122,10 @@ function Add-Environment-Variables {
         [System.Environment]::SetEnvironmentVariable("AWS_CA_BUNDLE", $Store, "Machine")
         Write-Output "AWS_CA_BUNDLE Environment Variable configured"
         }
+    if (-Not [System.Environment]::GetEnvironmentVariable('HTTPLIB2_CA_CERTS') ) {
+        [System.Environment]::SetEnvironmentVariable("HTTPLIB2_CA_CERTS", $Store, "Machine")
+        Write-Output "HTTPLIB2_CA_CERTS Environment Variable configured"
+        }
 }
 
 function Main {
